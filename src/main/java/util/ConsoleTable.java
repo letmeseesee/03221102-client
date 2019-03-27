@@ -33,8 +33,9 @@ public class ConsoleTable {
         List row = rows.get(rows.size() - 1);
         row.add(value);
         int len = value.toString().getBytes().length;
-        if (columLen[row.size() - 1] < len)
+        if (columLen[row.size() - 1] < len) {
             columLen[row.size() - 1] = len;
+        }
         return this;
     }
 
@@ -45,24 +46,29 @@ public class ConsoleTable {
         for (int len : columLen) {
             sumlen += len;
         }
-        if (printHeader)
+        if (printHeader) {
             buf.append("|").append(printChar('=', sumlen + margin * 2 * colum + (colum - 1))).append("|\n");
-        else
+        }
+        else {
             buf.append("|").append(printChar('-', sumlen + margin * 2 * colum + (colum - 1))).append("|\n");
+        }
         for (int ii = 0; ii < rows.size(); ii++) {
             List row = rows.get(ii);
             for (int i = 0; i < colum; i++) {
                 String o = "";
-                if (i < row.size())
+                if (i < row.size()) {
                     o = row.get(i).toString();
+                }
                 buf.append('|').append(printChar(' ', margin)).append(o);
                 buf.append(printChar(' ', columLen[i] - o.getBytes().length + margin));
             }
             buf.append("|\n");
-            if (printHeader && ii == 0)
+            if (printHeader && ii == 0) {
                 buf.append("|").append(printChar('=', sumlen + margin * 2 * colum + (colum - 1))).append("|\n");
-            else
+            }
+            else {
                 buf.append("|").append(printChar('-', sumlen + margin * 2 * colum + (colum - 1))).append("|\n");
+            }
         }
         return buf.toString();
     }

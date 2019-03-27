@@ -9,8 +9,8 @@
         <module name="03221102-client" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="03221102-client" target="1.5" />
+    <bytecodeTargetLevel target="8">
+      <module name="03221102-client" target="8" />
     </bytecodeTargetLevel>
   </component>
 </project>

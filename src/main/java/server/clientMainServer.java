@@ -1,5 +1,6 @@
 package server;
 
+import facade.vo.Flow;
 import facade.vo.Reponse.Reponse;
 import facade.vo.User;
 import facade.vo.request.Request;
@@ -7,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.ConsoleTable;
 
+import java.util.List;
 import java.util.Scanner;
 
 import static com.alibaba.fastjson.JSON.parseObject;
@@ -20,7 +22,7 @@ public class clientMainServer {
     private User loginUser;
     private Scanner in = new Scanner(System.in);
     public clientMainServer(){
-
+        loginUser = new User();
     }
 
     public void mainServer(){
@@ -31,6 +33,9 @@ public class clientMainServer {
             Boolean result = register();
         }else if("l".equals(operation)) {
             Boolean result = login();
+        }else {
+            logger.info("非法输入");
+            System.exit(0);
         }
         //启动主循环
         mainLoop();
@@ -65,6 +70,8 @@ public class clientMainServer {
             //账户金额初始化为0
             loginUser.setMoney(0);
             loginUser.setId(reponse.getUser().getId());
+            loginUser.setCharge(reponse.getUser().getCharge());
+            loginUser.setIsAdmin(reponse.getUser().getIsAdmin());
         }else{
             logger.info("注册失败");
             System.exit(0);
@@ -92,13 +99,12 @@ public class clientMainServer {
         Reponse reponse = ClientServer.request(loginRequest);
         if(reponse.getCode() == 0){
             logger.info("登陆成功");
-            //账户金额初始化为0
             loginUser.setMoney(reponse.getUser().getMoney());
             loginUser.setUserAddress(reponse.getUser().getUserAddress());
             loginUser.setUserPhone(reponse.getUser().getUserPhone());
             loginUser.setId(reponse.getUser().getId());
         }else{
-            logger.info("注册失败");
+            logger.info("登陆失败");
             System.exit(0);
         }
         return true;
@@ -107,24 +113,24 @@ public class clientMainServer {
     private void mainLoop(){
         //主功能 1.存取款 2.流水记录 3.账户详情
         logger.info("输入需要执行的操作");
-        logger.info("a:存款 b:取款 c:查询余额 d:账户详情 e:退出");
+        logger.info("a:存款 b:取款 c:查询流水 d:账户详情 e:退出");
         String operation = in.nextLine();
         Boolean result = true;
         while(true){
-            switch (operation.charAt(0)){
-                case 'a':
+            switch (operation){
+                case "a":
                     result = save();
                     break;
-                case 'b':
+                case "b":
                     result = take();
                     break;
-                case 'c':
+                case "c":
                     result = listFlow();
                     break;
-                case 'd':
+                case "d":
                     result = detail();
                     break;
-                case 'e':
+                case "e":
                     logger.info("客户端退出中。。。");
                     System.exit(0);
                     break;
@@ -132,7 +138,7 @@ public class clientMainServer {
                     logger.warn("非法操作");
             }
             logger.info("输入需要执行的操作");
-            logger.info("a:存款 b:取款 c:查询余额 d:账户详情");
+            logger.info("a:存款 b:取款 c:查询流水 d:账户详情");
             operation = in.nextLine();
         }
     }
@@ -154,7 +160,7 @@ public class clientMainServer {
         Reponse reponse = ClientServer.request(savingRequest);
         if(reponse.getCode() == 0){
             logger.info("存款成功");
-            loginUser.setMoney(reponse.getUser().getMoney());
+            loginUser.setMoney(loginUser.getMoney() + savingMoney);
         }else{
             logger.info("存款失败");
         }
@@ -182,10 +188,10 @@ public class clientMainServer {
         Reponse reponse = ClientServer.request(takeRequest);
         if(reponse.getCode() == 0){
             logger.info("取款成功");
-            loginUser.setMoney(reponse.getUser().getMoney());
-            loginUser.setCharge(reponse.getUser().getCharge());
+            loginUser.setMoney(loginUser.getMoney() - takeMoney);
+            loginUser.setCharge(takeMoney);
         }else{
-            logger.info("取款成功");
+            logger.info("取款失败");
         }
         return true;
     }
@@ -199,7 +205,32 @@ public class clientMainServer {
         Request savingRequest = new Request();
         savingRequest.setChargeType(0);
         savingRequest.setUser(loginUser);
-        savingRequest.setTarget("saveMoney");
+        savingRequest.setTarget("getFlow");
+
+        Reponse reponse = ClientServer.request(savingRequest);
+        if(reponse.getCode() == 0){
+            ConsoleTable t = new ConsoleTable(5, true);
+            t.appendRow();
+            t.appendColum("姓名").appendColum("流水号").appendColum("类型").appendColum("金额").appendColum("余额");
+
+            List<Flow> flowList = reponse.getUserFlows();
+            for (Flow flow:flowList) {
+                t.appendRow();
+                if(flow.getType() == 1) {
+                    t.appendColum(loginUser.getUserName()).appendColum(flow.getId()).appendColum("存款").appendColum(flow.getCharge()).appendColum(flow.getMoney());
+                }else {
+                    t.appendColum(loginUser.getUserName()).appendColum(flow.getId()).appendColum("取款").appendColum("-" + flow.getCharge()).appendColum(flow.getMoney());
+                }
+            }
+            System.out.println(t.toString());
+        }else{
+            logger.info("无流水记录");
+        }
+        try {
+            Thread.sleep(1000);
+        }catch (Exception e){
+            logger.info("输出详情失败");
+        }
         return true;
     }
 
@@ -208,14 +239,17 @@ public class clientMainServer {
      * @return boolean
      */
     private Boolean detail(){
-        ConsoleTable t = new ConsoleTable(4, true);
+        ConsoleTable t = new ConsoleTable(5, true);
         t.appendRow();
         t.appendColum("序号").appendColum("姓名").appendColum("电话").appendColum("地址").appendColum("余额");
-
         t.appendRow();
         t.appendColum(loginUser.getId()).appendColum(loginUser.getUserName()).appendColum(loginUser.getUserAddress()).appendColum(loginUser.getMoney());
-
         System.out.println(t.toString());
+        try {
+            Thread.sleep(1000);
+        }catch (Exception e){
+            logger.info("输出详情失败");
+        }
         return true;
     }
 }

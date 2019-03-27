@@ -1,5 +1,6 @@
 package facade.vo.Reponse;
 
+import facade.vo.Flow;
 import facade.vo.User;
 import lombok.Data;
 
@@ -11,5 +12,5 @@ public class Reponse {
     String msg;
     User user;
     List<User> users;
-    List<User> userFlows;
+    List<Flow> userFlows;
 }
