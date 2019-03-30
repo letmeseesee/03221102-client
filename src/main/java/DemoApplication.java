@@ -31,8 +31,6 @@
  */
 
 import config.Config;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import server.ClientServer;
 import server.clientMainServer;
 
@@ -42,18 +40,17 @@ import java.util.Scanner;
  * @author 阿尔卑斯狗 2019-3-22 服务端程序入口
  */
 public class DemoApplication {
-    final static Logger logger = LoggerFactory.getLogger(DemoApplication.class);
 
     public static void main(String[] args) {
-        logger.info("客户端程序启动中。。。");
+        System.out.println("客户端程序启动中。。。");
 
-        logger.info("输入服务器IP:");
+        System.out.println("输入服务器IP:");
         Scanner in = new Scanner(System.in);
         Config.serverHost = in.nextLine();
         ClientServer clientServer = new ClientServer();
         clientMainServer clientMainServer = new clientMainServer();
         clientMainServer.mainServer();
         //结束
-        logger.info("客户端程序关闭");
+        System.out.println("客户端程序关闭");
     }
 }

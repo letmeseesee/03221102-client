@@ -3,8 +3,6 @@ package server;
 import config.Config;
 import facade.vo.Reponse.Reponse;
 import facade.vo.request.Request;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -20,7 +18,6 @@ import static com.alibaba.fastjson.JSON.toJSONString;
  * 发送客户端请求
  */
 public class ClientServer {
-    final static Logger logger = LoggerFactory.getLogger(ClientServer.class);
     public static final int port = 8888;
     public static String host;
 
@@ -37,24 +34,24 @@ public class ClientServer {
             PrintStream out = new PrintStream(socket.getOutputStream());
             out.println(requestString);
 //                String str = new BufferedReader(new InputStreamReader(System.in)).readLine();
-//                logger.info(str);
+//                System.out.println(str);
 
             //读取服务器端返回数据
             BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             String ret = input.readLine();
-            logger.info("服务器端返回过来的是: " + ret);
+            System.out.println("服务器端返回过来的是: " + ret);
             out.close();
             input.close();
             return ret;
         } catch (Exception e) {
-            logger.info("服务端异常:" + e.getMessage());
+            System.out.println("服务端异常:" + e.getMessage());
         } finally {
             if (socket != null) {
                 try {
                     socket.close();
                 } catch (IOException e) {
                     socket = null;
-                    logger.info("客户端 finally 异常:" + e.getMessage());
+                    System.out.println("客户端 finally 异常:" + e.getMessage());
                 }
             }
         }
@@ -62,7 +59,7 @@ public class ClientServer {
     }
 
     static Reponse request(Request loginRequest) {
-        logger.info("请求服务端中。。。");
+        System.out.println("请求服务端中。。。");
         String loginRequestSendToService = toJSONString(loginRequest);
         String resonseString = ClientServer.send(loginRequestSendToService);
         return parseObject(resonseString, Reponse.class);

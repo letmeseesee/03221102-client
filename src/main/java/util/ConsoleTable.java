@@ -80,17 +80,4 @@ public class ConsoleTable {
         }
         return buf.toString();
     }
-
-    public static void demo() {
-        ConsoleTable t = new ConsoleTable(4, true);
-        t.appendRow();
-        t.appendColum("序号").appendColum("姓名").appendColum("性别").appendColum("年龄");
-
-        t.appendRow();
-        t.appendColum("1").appendColum("张123213dadad").appendColum("男").appendColum("11");
-
-        t.appendRow();
-        t.appendColum("22").appendColum("23123强3333");
-        System.out.println(t.toString());
-    }
 }

@@ -4,21 +4,15 @@ import facade.vo.Flow;
 import facade.vo.Reponse.Reponse;
 import facade.vo.User;
 import facade.vo.request.Request;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import util.ConsoleTable;
 
 import java.util.List;
 import java.util.Scanner;
 
-import static com.alibaba.fastjson.JSON.parseObject;
-import static com.alibaba.fastjson.JSON.toJSONString;
-
 /**
- * @author
+ * @author  2019-3-24
  */
 public class clientMainServer {
-    final static Logger logger = LoggerFactory.getLogger(clientMainServer.class);
     private User loginUser;
     private Scanner in = new Scanner(System.in);
     public clientMainServer(){
@@ -27,14 +21,14 @@ public class clientMainServer {
 
     public void mainServer(){
         //登陆或者注册
-        logger.info("输入i注册新用户，输入l登陆");
+        System.out.println("输入i注册新用户，输入l登陆");
         String operation = in.nextLine();
         if("i".equals(operation)) {
             Boolean result = register();
         }else if("l".equals(operation)) {
             Boolean result = login();
         }else {
-            logger.info("非法输入");
+            System.out.println("非法输入");
             System.exit(0);
         }
         //启动主循环
@@ -42,16 +36,16 @@ public class clientMainServer {
     }
 
     private Boolean register(){
-        logger.info("输入用户名");
+        System.out.println("输入用户名");
         String username = in.nextLine();
 
-        logger.info("输入用户地址");
+        System.out.println("输入用户地址");
         String userAddress = in.nextLine();
 
-        logger.info("输入用户电话");
+        System.out.println("输入用户电话");
         String userPhone = in.nextLine();
 
-        logger.info("输入用户密码");
+        System.out.println("输入用户密码");
         String userPassword = in.nextLine();
 
         loginUser.setUserName(username);
@@ -66,14 +60,14 @@ public class clientMainServer {
         //生成一个User实体发给服务端
         Reponse reponse = ClientServer.request(registerRequest);
         if(reponse.getCode() == 0){
-            logger.info("注册成功");
+            System.out.println("注册成功");
             //账户金额初始化为0
             loginUser.setMoney(0);
             loginUser.setId(reponse.getUser().getId());
             loginUser.setCharge(reponse.getUser().getCharge());
             loginUser.setIsAdmin(reponse.getUser().getIsAdmin());
         }else{
-            logger.info("注册失败");
+            System.out.println("注册失败");
             System.exit(0);
         }
         //请求服务端
@@ -82,10 +76,10 @@ public class clientMainServer {
 
     private Boolean login(){
         Scanner in = new Scanner(System.in);
-        logger.info("输入用户名");
+        System.out.println("输入用户名");
         String username = in.nextLine();
 
-        logger.info("输入用户密码");
+        System.out.println("输入用户密码");
         String userPassword = in.nextLine();
 
         loginUser.setUserPassword(userPassword);
@@ -98,13 +92,13 @@ public class clientMainServer {
         //生成一个实体传给服务端判定是否存在
         Reponse reponse = ClientServer.request(loginRequest);
         if(reponse.getCode() == 0){
-            logger.info("登陆成功");
+            System.out.println("登陆成功");
             loginUser.setMoney(reponse.getUser().getMoney());
             loginUser.setUserAddress(reponse.getUser().getUserAddress());
             loginUser.setUserPhone(reponse.getUser().getUserPhone());
             loginUser.setId(reponse.getUser().getId());
         }else{
-            logger.info("登陆失败");
+            System.out.println("登陆失败");
             System.exit(0);
         }
         return true;
@@ -112,8 +106,8 @@ public class clientMainServer {
 
     private void mainLoop(){
         //主功能 1.存取款 2.流水记录 3.账户详情
-        logger.info("输入需要执行的操作");
-        logger.info("a:存款 b:取款 c:查询流水 d:账户详情 e:退出");
+        System.out.println("输入需要执行的操作");
+        System.out.println("a:存款 b:取款 c:查询流水 d:账户详情 e:退出");
         String operation = in.nextLine();
         Boolean result = true;
         while(true){
@@ -131,14 +125,14 @@ public class clientMainServer {
                     result = detail();
                     break;
                 case "e":
-                    logger.info("客户端退出中。。。");
+                    System.out.println("客户端退出中。。。");
                     System.exit(0);
                     break;
                 default:
-                    logger.warn("非法操作");
+                    System.out.println("非法操作");
             }
-            logger.info("输入需要执行的操作");
-            logger.info("a:存款 b:取款 c:查询流水 d:账户详情");
+            System.out.println("输入需要执行的操作");
+            System.out.println("a:存款 b:取款 c:查询流水 d:账户详情 e:退出");
             operation = in.nextLine();
         }
     }
@@ -148,7 +142,7 @@ public class clientMainServer {
      * @return boolean
      */
     private Boolean save(){
-        logger.info("输入存款金额：");
+        System.out.println("输入存款金额：");
         Integer savingMoney = in.nextInt();
         loginUser.setMoney(loginUser.getMoney() + savingMoney);
         loginUser.setCharge(savingMoney);
@@ -159,10 +153,10 @@ public class clientMainServer {
 
         Reponse reponse = ClientServer.request(savingRequest);
         if(reponse.getCode() == 0){
-            logger.info("存款成功");
-            loginUser.setMoney(loginUser.getMoney() + savingMoney);
+            System.out.println("存款成功");
         }else{
-            logger.info("存款失败");
+            loginUser.setMoney(loginUser.getMoney() - savingMoney);
+            System.out.println("存款失败");
         }
         return true;
     }
@@ -172,10 +166,10 @@ public class clientMainServer {
      * @return boolean
      */
     private Boolean take(){
-        logger.info("输入取款金额：");
+        System.out.println("输入取款金额：");
         Integer takeMoney = in.nextInt();
         if(takeMoney > loginUser.getMoney()){
-            logger.warn("账户余额不足");
+            System.out.println("账户余额不足");
             return false;
         }
         loginUser.setMoney(loginUser.getMoney() - takeMoney);
@@ -187,11 +181,11 @@ public class clientMainServer {
 
         Reponse reponse = ClientServer.request(takeRequest);
         if(reponse.getCode() == 0){
-            logger.info("取款成功");
-            loginUser.setMoney(loginUser.getMoney() - takeMoney);
+            System.out.println("取款成功");
             loginUser.setCharge(takeMoney);
         }else{
-            logger.info("取款失败");
+            loginUser.setMoney(loginUser.getMoney() + takeMoney);
+            System.out.println("取款失败");
         }
         return true;
     }
@@ -201,7 +195,7 @@ public class clientMainServer {
      * @return boolean
      */
     private Boolean listFlow(){
-        logger.info("尝试连接服务器获取记录。。。");
+        System.out.println("尝试连接服务器获取记录。。。");
         Request savingRequest = new Request();
         savingRequest.setChargeType(0);
         savingRequest.setUser(loginUser);
@@ -224,12 +218,12 @@ public class clientMainServer {
             }
             System.out.println(t.toString());
         }else{
-            logger.info("无流水记录");
+            System.out.println("无流水记录");
         }
         try {
             Thread.sleep(1000);
         }catch (Exception e){
-            logger.info("输出详情失败");
+            System.out.println("输出详情失败");
         }
         return true;
     }
@@ -243,12 +237,12 @@ public class clientMainServer {
         t.appendRow();
         t.appendColum("序号").appendColum("姓名").appendColum("电话").appendColum("地址").appendColum("余额");
         t.appendRow();
-        t.appendColum(loginUser.getId()).appendColum(loginUser.getUserName()).appendColum(loginUser.getUserAddress()).appendColum(loginUser.getMoney());
+        t.appendColum(loginUser.getId()).appendColum(loginUser.getUserName()).appendColum(loginUser.getUserPhone()).appendColum(loginUser.getUserAddress()).appendColum(loginUser.getMoney());
         System.out.println(t.toString());
         try {
             Thread.sleep(1000);
         }catch (Exception e){
-            logger.info("输出详情失败");
+            System.out.println("输出详情失败");
         }
         return true;
     }
